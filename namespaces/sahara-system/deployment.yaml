@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gomoku-game
+  namespace: sahara-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gomoku-game
+  template:
+    metadata:
+      labels:
+        app: gomoku-game
+    spec:
+      containers:
+        - name: game
+          image: node:20-alpine
+          command: ["node", "/app/app.js"]
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 10000
+            runAsGroup: 10000
+            readOnlyRootFilesystem: true
+            seccompProfile:
+              type: RuntimeDefault
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - name: app-code
+              mountPath: /app
+            - name: tmp-dir
+              mountPath: /tmp
+      securityContext:
+        fsGroup: 10000
+      volumes:
+        - name: app-code
+          configMap:
+            name: gomoku-code
+        - name: tmp-dir
+          emptyDir: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gomoku-code
+  namespace: sahara-system
+data:
+  app.js: |
+    // Will be populated by the configmap creation or direct content overlay
