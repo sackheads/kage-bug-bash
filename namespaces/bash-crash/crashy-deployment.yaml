@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crashy
+  namespace: bash-crash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crashy
+  template:
+    metadata:
+      labels:
+        app: crashy
+    spec:
+      containers:
+        - name: crashy
+          image: busybox:1.36
+          command: ["sh", "-c", "echo starting; sleep 5; echo 'fatal: config missing' >&2; exit 1"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
