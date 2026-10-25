@@ -1,0 +1,13 @@
+# Cluster: bnaylor-kagents-fleet/us-central1/ka-bash-1
+# Check: no-pdb
+# Finding: no-pdb.bnaylor-kagents-fleet/us-central1/ka-bash-1.bash-uabdullah.Deployment/web
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: web-pdb
+  namespace: bash-uabdullah
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: web
